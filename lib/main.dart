@@ -6,6 +6,7 @@ import 'screens/patient_billing.dart';
 import 'screens/patient_finance.dart';
 import 'screens/speech_to_text.dart';
 import 'screens/insurance_card_scanner.dart';
+import 'package:medimesh/screens/patient_stats.dart';
 
 void main() {
   runApp(MediMeshApp());
@@ -49,12 +50,15 @@ class MediMeshApp extends StatelessWidget {
         '/finance': (context) => PatientFinanceScreen(),
         '/voice': (context) => SpeechRecognitionPage(),
         '/scanner': (context) => InsuranceCardScanner(),
+        '/stats': (context) => PatientStatsScreen(),
       },
     );
   }
 }
 
 class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -68,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: const Text('Login'),
         centerTitle: true,
         backgroundColor: Colors.blue[700],
       ),

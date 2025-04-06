@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
+import 'hospital_permissions.dart'; // Import the permissions screen
+import 'hospital_billing_history.dart'; // Import the new billing history screen
 
 class HospitalPortal extends StatelessWidget {
+  const HospitalPortal({super.key});
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue[50],
       appBar: AppBar(
-        title: Text('Hospital Portal'),
+        title: const Text('Hospital Portal'),
         backgroundColor: Colors.blue[800],
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () => Navigator.pop(context),
           )
         ],
@@ -20,7 +24,7 @@ class HospitalPortal extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               'Welcome, Hospital Admin! 👨‍⚕️',
               textAlign: TextAlign.center,
@@ -30,24 +34,23 @@ class HospitalPortal extends StatelessWidget {
                 color: Colors.blue[900],
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               "Manage apps, control permissions, and view system activity logs.",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.blue[700]),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             GridView.count(
               shrinkWrap: true,
               crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               children: [
-                _buildDashboardButton("Stats", Icons.bar_chart),
-                _buildDashboardButton("App", Icons.apps),
-                _buildDashboardButton("Permissions", Icons.lock_open),
-                _buildDashboardButton("Audit Logs", Icons.receipt_long),
+                _buildDashboardButton(context, "Patient Stats", Icons.bar_chart),
+                _buildDashboardButton(context, "App", Icons.apps),
+                _buildDashboardButton(context, "Billing History", Icons.receipt_long),
               ],
             ),
           ],
@@ -55,8 +58,8 @@ class HospitalPortal extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildDashboardButton(String title, IconData icon) {
+  
+  Widget _buildDashboardButton(BuildContext context, String title, IconData icon) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white,
@@ -65,14 +68,31 @@ class HospitalPortal extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
-        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
       ),
-      onPressed: () {},
+      onPressed: () {
+        if (title == "Patient Stats") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HospitalPermissionsScreen(),
+            ),
+          );
+        } else if (title == "Billing History") {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const BillingHistoryScreen(),
+            ),
+          );
+        }
+        // You can add similar conditions for other buttons later
+      },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: Colors.blue[700], size: 30),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Text(
             title,
             style: TextStyle(

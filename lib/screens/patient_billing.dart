@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medimesh/screens/insurance_card_scanner.dart';
+import 'package:medimesh/screens/credit_card_scanner.dart';
 
 class PatientBillingScreen extends StatefulWidget {
   @override
@@ -10,16 +11,23 @@ class _PatientBillingScreenState extends State<PatientBillingScreen> {
   String groupNumber = '';
   String memberId = '';
   String planCoverage = '';
+  String cardHolderName = '';
+  String expiryDate = '';
   final TextEditingController creditCardController = TextEditingController();
 
   void updateInsuranceInfo(String scannedText) {
-    // Basic parsing from scanned text
     setState(() {
-      groupNumber =
-          _extractMatch(scannedText, r'Group\s*#[:\s]*([A-Za-z0-9\-]+)');
-      memberId =
-          _extractMatch(scannedText, r'Member\s*ID[:\s]*([A-Za-z0-9\-]+)');
+      groupNumber = _extractMatch(scannedText, r'Group\s*#[:\s]*([A-Za-z0-9\-]+)');
+      memberId = _extractMatch(scannedText, r'Member\s*ID[:\s]*([A-Za-z0-9\-]+)');
       planCoverage = _extractMatch(scannedText, r'Plan\s*Coverage[:\s]*(.+)');
+    });
+  }
+
+  void updateCreditCardInfo(Map<String, String> data) {
+    setState(() {
+      creditCardController.text = data['cardNumber'] ?? '';
+      cardHolderName = data['cardHolderName'] ?? '';
+      expiryDate = data['expiryDate'] ?? '';
     });
   }
 
@@ -54,21 +62,18 @@ class _PatientBillingScreenState extends State<PatientBillingScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              'Scan your insurance card and enter your credit card details.',
+              'Scan your insurance and credit cards for quick access.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.blue[700]),
             ),
             SizedBox(height: 30),
 
-            // Scan Button
             ElevatedButton.icon(
               onPressed: () async {
                 final scannedText = await Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => InsuranceCardScanner()),
+                  MaterialPageRoute(builder: (context) => InsuranceCardScanner()),
                 );
-
                 if (scannedText != null && scannedText is String) {
                   updateInsuranceInfo(scannedText);
                 }
@@ -84,10 +89,7 @@ class _PatientBillingScreenState extends State<PatientBillingScreen> {
 
             SizedBox(height: 20),
 
-            // Organized Display of Insurance Info
-            if (groupNumber.isNotEmpty ||
-                memberId.isNotEmpty ||
-                planCoverage.isNotEmpty)
+            if (groupNumber.isNotEmpty || memberId.isNotEmpty || planCoverage.isNotEmpty)
               Container(
                 width: double.infinity,
                 padding: EdgeInsets.all(16),
@@ -108,7 +110,6 @@ class _PatientBillingScreenState extends State<PatientBillingScreen> {
 
             SizedBox(height: 30),
 
-            // Credit Card Section
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -132,7 +133,45 @@ class _PatientBillingScreenState extends State<PatientBillingScreen> {
               ),
               keyboardType: TextInputType.number,
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
+            ElevatedButton.icon(
+              onPressed: () async {
+                final cardData = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CreditCardScanner()),
+                );
+                if (cardData != null && cardData is Map<String, String>) {
+                  updateCreditCardInfo(cardData);
+                }
+              },
+              icon: Icon(Icons.credit_card),
+              label: Text("Scan Credit Card"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
+
+            if (cardHolderName.isNotEmpty || expiryDate.isNotEmpty)
+              Container(
+                margin: EdgeInsets.only(top: 20),
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.purpleAccent),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _infoRow("Cardholder Name", cardHolderName),
+                    _infoRow("Expiry Date", expiryDate),
+                  ],
+                ),
+              ),
+
+            SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(

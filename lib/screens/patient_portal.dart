@@ -127,6 +127,8 @@ class PatientPortal extends StatelessWidget {
         } else if (title == "Mic") {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => SpeechRecognitionPage()));
+        } else if (title == "Stats") {
+            Navigator.pushNamed(context, '/stats'); // ✅ Route for Stats!
         }
         // Add more routes for Stats and App if needed
       },
