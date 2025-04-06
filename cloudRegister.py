@@ -2,9 +2,16 @@ import grpc
 import medimesh_pb2
 import medimesh_pb2_grpc
 from pymongo import MongoClient
+import os
 
 # MongoDB connection setup
-client = MongoClient("mongodb://localhost:27017/")  # Connect to local MongoDB instance
+atlas_connection_string = os.getenv('MONGO_ATLAS_URI')
+
+if not atlas_connection_string:
+    raise ValueError("Atlas connection string not found in .env file")
+
+# Create a MongoDB client using the Atlas connection string
+client = MongoClient(atlas_connection_string)
 db = client["ehr_database"]
 app_permissions_collection = db["app_permissions"]  # App Permissions collection
 

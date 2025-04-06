@@ -1,7 +1,13 @@
 from pymongo import MongoClient
+import os
+from dotenv import load_dotenv
 
 # Connect to MongoDB
-client = MongoClient("mongodb://localhost:27017/")  # Use your Atlas link if on cloud
+atlas_connection_string = os.getenv('MONGO_ATLAS_URI')
+if not atlas_connection_string:
+    raise ValueError("Atlas connection string not found in .env file")
+client = MongoClient(atlas_connection_string)
+
 db = client["ehr_database"]
 patients = db["patients"]
 app_permissions = db["app_permissions"]

@@ -7,6 +7,8 @@ import datetime
 import requests
 import uuid
 import time
+import os
+from dotenv import load_dotenv
 
 def serve():
     # Set up the gRPC server
@@ -23,13 +25,22 @@ def serve():
     except KeyboardInterrupt:
         server.stop(0)
 
+# Load environment variables from the .env file
+load_dotenv()
+
 # MongoDB connection setup (local connection)
 def get_mongo_client():
     try:
-        # Local MongoDB connection (localhost, default port 27017)
-        client = MongoClient('mongodb://localhost:27017/')
+        # Get the connection string from environment variables
+        atlas_connection_string = os.getenv('MONGO_ATLAS_URI')
+
+        if not atlas_connection_string:
+            raise ValueError("Atlas connection string not found in .env file")
+        
+        # Create a MongoDB client using the Atlas connection string
+        client = MongoClient(atlas_connection_string)
         client.admin.command('ping')  # Test the connection
-        print("Successfully connected to MongoDB locally")
+        print("Successfully connected to MongoDB Atlas")
         return client
     except Exception as e:
         print("Error connecting to MongoDB:", e)
