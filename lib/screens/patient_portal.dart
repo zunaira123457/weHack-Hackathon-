@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'patient_permissions.dart'; // Permissions screen
-import 'patient_billing.dart'; // Billing screen
-import 'patient_finance.dart'; // Finance screen (updated to compare hospital prices)
+import 'patient_permissions.dart';
+import 'patient_billing.dart';
+import 'patient_finance.dart';
+import 'speech_to_text.dart';
 
 class PatientPortal extends StatelessWidget {
   final List<String> hospitals = [
@@ -40,7 +41,7 @@ class PatientPortal extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              "Compare hospital costs, manage your billing, and control your app permissions easily.",
+              "Easily view your stats, manage app permissions, check billing info, and even speak commands!",
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.blue[700]),
             ),
@@ -58,6 +59,8 @@ class PatientPortal extends StatelessWidget {
                     context, "Permissions", Icons.verified_user),
                 _buildDashboardButton(context, "Billing", Icons.payment),
                 _buildDashboardButton(context, "Finance", Icons.trending_up),
+                _buildDashboardButton(
+                    context, "Mic", Icons.mic), // 🎙️ New voice input
               ],
             ),
             SizedBox(height: 30),
@@ -112,21 +115,20 @@ class PatientPortal extends StatelessWidget {
       onPressed: () {
         if (title == "Permissions") {
           Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => PatientPermissionsScreen()),
-          );
+              context,
+              MaterialPageRoute(
+                  builder: (context) => PatientPermissionsScreen()));
         } else if (title == "Billing") {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => PatientBillingScreen()),
-          );
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => PatientBillingScreen()));
         } else if (title == "Finance") {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => PatientFinanceScreen()),
-          );
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => PatientFinanceScreen()));
+        } else if (title == "Mic") {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => SpeechRecognitionPage()));
         }
-        // You can add similar conditions for Stats and App later
+        // Add more routes for Stats and App if needed
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

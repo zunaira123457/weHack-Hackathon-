@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medimesh/screens/insurance_card_scanner.dart';
 
 class PatientBillingScreen extends StatefulWidget {
   @override
@@ -6,8 +7,26 @@ class PatientBillingScreen extends StatefulWidget {
 }
 
 class _PatientBillingScreenState extends State<PatientBillingScreen> {
-  final TextEditingController insuranceController = TextEditingController();
+  String groupNumber = '';
+  String memberId = '';
+  String planCoverage = '';
   final TextEditingController creditCardController = TextEditingController();
+
+  void updateInsuranceInfo(String scannedText) {
+    // Basic parsing from scanned text
+    setState(() {
+      groupNumber =
+          _extractMatch(scannedText, r'Group\s*#[:\s]*([A-Za-z0-9\-]+)');
+      memberId =
+          _extractMatch(scannedText, r'Member\s*ID[:\s]*([A-Za-z0-9\-]+)');
+      planCoverage = _extractMatch(scannedText, r'Plan\s*Coverage[:\s]*(.+)');
+    });
+  }
+
+  String _extractMatch(String text, String pattern) {
+    final match = RegExp(pattern, caseSensitive: false).firstMatch(text);
+    return match != null ? match.group(1)!.trim() : 'Not found';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,42 +54,24 @@ class _PatientBillingScreenState extends State<PatientBillingScreen> {
             ),
             SizedBox(height: 10),
             Text(
-              'You can either scan or manually enter your insurance and credit card details.',
+              'Scan your insurance card and enter your credit card details.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.blue[700]),
             ),
             SizedBox(height: 30),
 
-            // Insurance Card Section
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Insurance Card",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[800]),
-              ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: insuranceController,
-              decoration: InputDecoration(
-                hintText: 'Enter Insurance ID',
-                fillColor: Colors.white,
-                filled: true,
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-            SizedBox(height: 10),
+            // Scan Button
             ElevatedButton.icon(
-              onPressed: () {
-                // Simulated scanner
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text('📷 Scanner not available in this demo.')),
+              onPressed: () async {
+                final scannedText = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => InsuranceCardScanner()),
                 );
+
+                if (scannedText != null && scannedText is String) {
+                  updateInsuranceInfo(scannedText);
+                }
               },
               icon: Icon(Icons.camera_alt),
               label: Text('Scan Insurance Card'),
@@ -80,6 +81,30 @@ class _PatientBillingScreenState extends State<PatientBillingScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
             ),
+
+            SizedBox(height: 20),
+
+            // Organized Display of Insurance Info
+            if (groupNumber.isNotEmpty ||
+                memberId.isNotEmpty ||
+                planCoverage.isNotEmpty)
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.blueAccent),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _infoRow("Group Number", groupNumber),
+                    _infoRow("Member ID", memberId),
+                    _infoRow("Plan Coverage", planCoverage),
+                  ],
+                ),
+              ),
 
             SizedBox(height: 30),
 
@@ -101,15 +126,15 @@ class _PatientBillingScreenState extends State<PatientBillingScreen> {
                 hintText: 'Enter Credit Card Number',
                 fillColor: Colors.white,
                 filled: true,
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               keyboardType: TextInputType.number,
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // Simulate saving billing info
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('✅ Billing info saved!')),
                 );
@@ -123,6 +148,16 @@ class _PatientBillingScreenState extends State<PatientBillingScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _infoRow(String title, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Text(
+        "$title: $value",
+        style: TextStyle(fontSize: 16, color: Colors.black87),
       ),
     );
   }
