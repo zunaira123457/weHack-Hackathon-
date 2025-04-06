@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package medimesh;
+
+service MediMeshService {
+  // Register a third-party app
+  rpc RegisterApp (AppRegistrationRequest) returns (AppRegistrationResponse);
+
+  // Request EMR data like vitals or medications
+  rpc GetEMRData (EMRDataRequest) returns (EMRDataResponse);
+
+  // Hospital toggles app permissions
+  rpc UpdateAppPermissions (PermissionUpdateRequest) returns (PermissionUpdateResponse);
+
+  // Get audit log entries
+  rpc GetAuditLogs (AuditLogRequest) returns (AuditLogResponse);
+
+  // Patient toggles app permissions
+  rpc UpdatePatientPermissions(PatientPermissionUpdateRequest) returns (PatientPermissionUpdateResponse);
+}
+
+// ---------------------- Messages ----------------------
+
+// App Registration
+message AppRegistrationRequest {
+  string app_name = 1;
+  string contact_email = 2;
+}
+
+message AppRegistrationResponse {
+  string app_id = 1;
+  string api_key = 2;
+  string message = 3;
+}
+
+// EMR Data Request
+message EMRDataRequest {
+  string app_id = 1;
+  string api_key = 2;
+  string data_type = 3;  // e.g., "vitals", "medications"
+  string patient_id = 4;
+}
+
+message EMRDataResponse {
+  string status = 1;
+  string patient_id = 2;
+  string patient_name = 3;
+  string dob = 4;
+  Vitals vitals = 5;
+  repeated string medications = 6;
+  repeated string diagnoses = 7;
+  Bill bill = 8;
+  LabResults lab_results = 9;
+}
+
+// Vitals message definition
+message Vitals {
+  int32 heart_rate = 1;
+  string blood_pressure = 2;
+}
+
+// Bill message definition (updated with insurance info)
+message Bill {
+  string bill_id = 1;
+  float amount_due = 2;
+  string status = 3;
+  string payment_due = 4; // Payment due date
+  Insurance insurance = 5;
+  Copayments copayments = 6;
+}
+
+// Insurance message definition
+message Insurance {
+  string company_name = 1;
+  string member_name = 2;
+  string member_id = 3;
+  string group_number = 4;
+  string plan = 5;
+}
+
+// Copayments message definition
+message Copayments {
+  float office_visit = 1;
+  float prescription = 2;
+  float emergency_room = 3;
+  float out_of_pocket_max = 4;
+}
+
+// LabResults message definition
+message LabResults {
+  string lab_test_name = 1;
+  string result = 2;
+  string date = 3;
+}
+
+// Permission Updates (granular access control)
+message FieldPermission {
+  string field_name = 1; // Field like "vitals", "medications", "bill", etc.
+  bool can_access = 2;    // True if the app has permission to access this field
+}
+
+message PermissionUpdateRequest {
+  string admin_token = 1;
+  string app_id = 2;
+  repeated FieldPermission permissions = 3;
+}
+
+message PermissionUpdateResponse {
+  string status = 1;
+  string message = 2;
+}
+
+// Audit Log
+message AuditLogRequest {
+  string admin_token = 1;
+  int32 limit = 2;
+}
+
+message AuditLogEntry {
+  string timestamp = 1;
+  string app_id = 2;
+  string data_type = 3;
+  string status = 4;
+}
+
+message AuditLogResponse {
+  repeated AuditLogEntry logs = 1;
+}
+
+// Update Patient Permissions
+message PatientPermissionUpdateRequest {
+  string patient_id = 1;
+  string app_id = 2;
+  string data_type = 3;  // e.g., "vitals", "medications"
+  bool grant_access = 4;
+}
+
+message PatientPermissionUpdateResponse {
+  string status = 1;
+  string message = 2;
+}
