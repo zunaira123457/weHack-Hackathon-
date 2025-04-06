@@ -73,9 +73,13 @@ def get_permissions(app_id):
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = medimesh_pb2_grpc.MediMeshServiceStub(channel)
 
-        request = medimesh_pb2.PermissionUpdateRequest(app_id=app_id)
-        response = stub.GetEMRData(request)  # Placeholder for fetching permissions, adjust if needed.
-        print(f"Permissions: {response.permissions}")
+        # Use the correct request message
+        request = medimesh_pb2.AppPermissionRequest(app_id=app_id)
+        response = stub.GetAppPermissions(request)
+
+        print("\nPermissions:")
+        for perm in response.permissions:
+            print(f"  {perm.field_name}: {'✅ Yes' if perm.can_access else '❌ No'}")
 
 def menu():
     """Displays a menu and processes the user's choice."""
@@ -96,7 +100,7 @@ def menu():
         
         # Collect the new permissions from the user
         while True:
-            field_name = input("Enter the field name to update (vitals, medications, bill, lab_results): ").lower()
+            field_name = input("Enter the field name to update (vitals, medications, bill): ").lower()
             can_access = input(f"Can access {field_name}? (y/n): ").lower() == 'y'
             permissions.append({"field_name": field_name, "can_access": can_access})
 

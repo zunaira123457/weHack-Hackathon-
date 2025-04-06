@@ -44,6 +44,11 @@ class MediMeshServiceStub(object):
                 request_serializer=medimesh__pb2.EMRDataRequest.SerializeToString,
                 response_deserializer=medimesh__pb2.EMRDataResponse.FromString,
                 _registered_method=True)
+        self.GetAppPermissions = channel.unary_unary(
+                '/medimesh.MediMeshService/GetAppPermissions',
+                request_serializer=medimesh__pb2.AppPermissionRequest.SerializeToString,
+                response_deserializer=medimesh__pb2.AppPermissionResponse.FromString,
+                _registered_method=True)
         self.UpdateAppPermissions = channel.unary_unary(
                 '/medimesh.MediMeshService/UpdateAppPermissions',
                 request_serializer=medimesh__pb2.PermissionUpdateRequest.SerializeToString,
@@ -73,6 +78,13 @@ class MediMeshServiceServicer(object):
 
     def GetEMRData(self, request, context):
         """Request EMR data like vitals or medications
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetAppPermissions(self, request, context):
+        """Fetch app permissions
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -111,6 +123,11 @@ def add_MediMeshServiceServicer_to_server(servicer, server):
                     servicer.GetEMRData,
                     request_deserializer=medimesh__pb2.EMRDataRequest.FromString,
                     response_serializer=medimesh__pb2.EMRDataResponse.SerializeToString,
+            ),
+            'GetAppPermissions': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetAppPermissions,
+                    request_deserializer=medimesh__pb2.AppPermissionRequest.FromString,
+                    response_serializer=medimesh__pb2.AppPermissionResponse.SerializeToString,
             ),
             'UpdateAppPermissions': grpc.unary_unary_rpc_method_handler(
                     servicer.UpdateAppPermissions,
@@ -182,6 +199,33 @@ class MediMeshService(object):
             '/medimesh.MediMeshService/GetEMRData',
             medimesh__pb2.EMRDataRequest.SerializeToString,
             medimesh__pb2.EMRDataResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetAppPermissions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/medimesh.MediMeshService/GetAppPermissions',
+            medimesh__pb2.AppPermissionRequest.SerializeToString,
+            medimesh__pb2.AppPermissionResponse.FromString,
             options,
             channel_credentials,
             insecure,

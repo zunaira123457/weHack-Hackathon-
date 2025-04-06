@@ -9,6 +9,9 @@ service MediMeshService {
   // Request EMR data like vitals or medications
   rpc GetEMRData (EMRDataRequest) returns (EMRDataResponse);
 
+  // Fetch app permissions
+  rpc GetAppPermissions (AppPermissionRequest) returns (AppPermissionResponse);
+
   // Hospital toggles app permissions
   rpc UpdateAppPermissions (PermissionUpdateRequest) returns (PermissionUpdateResponse);
 
@@ -108,6 +111,14 @@ message PermissionUpdateRequest {
 message PermissionUpdateResponse {
   string status = 1;
   string message = 2;
+}
+
+message AppPermissionRequest {
+  string app_id = 1;
+}
+
+message AppPermissionResponse {
+  repeated FieldPermission permissions = 1;
 }
 
 // Audit Log

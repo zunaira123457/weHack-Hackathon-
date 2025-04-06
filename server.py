@@ -48,25 +48,10 @@ class MediMeshService(medimesh_pb2_grpc.MediMeshServiceServicer):
         # Generate a unique app_id and API key
         app_id = str(uuid.uuid4())  # Generate a unique app_id using UUID
         api_key = self.generate_api_key()  # Generate a unique API key
+        app_name = request.app_name  # Get the app_name from the request
 
         try:
-            # Initialize default permissions
-            default_permissions = [
-                {"field_name": "vitals", "can_access": False},
-                {"field_name": "medications", "can_access": False},
-                {"field_name": "bill", "can_access": False}
-            ]
-            
-            # Store app registration, API key, and permissions in the app_permissions_collection
-            app_permissions_collection.insert_one({
-                "app_id": app_id,
-                "api_key": api_key,  # Store the generated API key
-                "permissions": default_permissions  # Initialize with default permissions
-            })
-
-            print(f"Registering app with ID: {app_id} and API key: {api_key}")
-
-            # You can return a success response here
+            # Generate response with app_id and api_key, but don't insert into DB here
             return medimesh_pb2.AppRegistrationResponse(
                 app_id=app_id,
                 api_key=api_key,
@@ -75,7 +60,7 @@ class MediMeshService(medimesh_pb2_grpc.MediMeshServiceServicer):
 
         except Exception as e:
             # Handle errors and return failure response
-            context.set_details(f"Error storing app permissions: {str(e)}")
+            context.set_details(f"Error generating app registration: {str(e)}")
             context.set_code(grpc.StatusCode.INTERNAL)
             return medimesh_pb2.AppRegistrationResponse(
                 app_id="",
@@ -131,6 +116,26 @@ class MediMeshService(medimesh_pb2_grpc.MediMeshServiceServicer):
             bill=bill,
             lab_results=lab_results
         )
+    
+    def GetAppPermissions(self, request, context):
+        app_id = request.app_id
+        permissions = self.get_permissions(app_id)
+
+        if not permissions:
+            context.set_details('No permissions found for the app.')
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            return medimesh_pb2.AppPermissionResponse(permissions=[])
+
+        permissions_response = []
+        for perm in permissions:
+            permissions_response.append(
+                medimesh_pb2.FieldPermission(
+                    field_name=perm['field_name'],
+                    can_access=perm['can_access']
+                )
+            )
+
+        return medimesh_pb2.AppPermissionResponse(permissions=permissions_response)
 
     def get_permissions(self, app_id):
         # Retrieve permissions from the database for the given app_id

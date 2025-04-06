@@ -13,8 +13,13 @@ def register_app():
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = medimesh_pb2_grpc.MediMeshServiceStub(channel)
 
-        # Call the RegisterApp RPC to register the app
-        request = medimesh_pb2.AppRegistrationRequest()
+        # Get app name from user input (no need to store in MongoDB on client side)
+        app_name = input("Enter the App Name: ")
+
+        # Create a request with app_name
+        request = medimesh_pb2.AppRegistrationRequest(
+            app_name=app_name
+        )
         response = stub.RegisterApp(request)
 
         # Extract app_id and api_key from the response
@@ -24,9 +29,7 @@ def register_app():
         print(f"App registered successfully!")
         print(f"App ID: {app_id}")
         print(f"API Key: {api_key}")
-
-        # Get app name from user input
-        app_name = input("Enter the App Name: ")
+        print(f"App Name: {app_name}")
 
         # Save the new app registration in MongoDB with app_name and permissions
         app_permissions_collection.insert_one({
@@ -39,7 +42,10 @@ def register_app():
                 {"field_name": "bill", "can_access": False}
             ]  # Initialize with no permissions
         })
-        print("✅ App registration saved in the database!")
+
+        # You can store the app name locally or elsewhere, but MongoDB insertion should only happen on the server.
+        # The server handles database insertion, so you do not need to insert the app registration again here.
+        print("✅ App registered successfully on the server!")
 
 def main():
     """Main function to start the app registration."""
